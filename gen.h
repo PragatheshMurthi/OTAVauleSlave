@@ -15,7 +15,31 @@ typedef enum {
     ERR_NET_IF_FAIL = 1
 } ERROR_CODE;
 
-static inline void print( const char* argv, ... ) {
+static inline void print_dbg( const char* argv, ... ) {
+    va_list args;
+    int done;
+
+    // 2. Initialize the argument list
+    va_start(args, format);
+    done = vprintf(format, args);
+    va_end(args);
+
+    return done;
+}
+
+static inline void print_err( const char* argv, ... ) {
+    va_list args;
+    int done;
+
+    // 2. Initialize the argument list
+    va_start(args, format);
+    done = vprintf(format, args);
+    va_end(args);
+
+    return done;
+}
+
+static inline void print_info( const char* argv, ... ) {
     va_list args;
     int done;
 
