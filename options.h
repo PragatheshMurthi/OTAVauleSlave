@@ -14,4 +14,17 @@
 #define ENABLE_WIFI_FOR_WAN
 //#define ENABLE_GSM_FOR_WAN
 
+###############################################################
+##                                                           ##
+##          Logging configuration                            ##
+##                                                           ##
+###############################################################
+
+#define ENABLE_DBG
+#define ENABLE_INFO
+#define ENABLE_ERROR
+
+#define ENABLE_UART_LOG
+//#define ENABLE_NETWORK_LOGG
+
 #endif /* OPTIONS_H */
