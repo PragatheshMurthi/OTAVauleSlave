@@ -1,6 +1,38 @@
 #ifndef NETINTER_H
 #define NETINTER_H
 
-void initializeInterfaces( void );
+#ifdef ENABLE_LORA_FOR_LAN
+typedef ennum{
+    LLORA_INVALID - 0,
+    LLORA_ACTIVE,
+    LLORA_INITIALIZING,
+    LLORA_CONNECTED,
+    LLORA_STATE_MAX
+}LAN_LORA_STATUS;
+#endif /* ENABLE_LORA_FOR_LAN */
+
+#ifdef ENABLE_WIFI_FOR_WAN
+typedef ennum{
+    WWIFI_INVALID - 0,
+    WWIFI_ACTIVE,
+    WWIFI_INITIALIZING,
+    WWIFI_CONNECTED,
+    WWIFI_STATE_MAX
+}WAN_WIFI_STATUS;
+
+#endif /* ENABLE_WIFI_FOR_WAN */
+
+#ifdef ENABLE_GSM_FOR_WAN
+typedef ennum{
+    WGSM_INVALID - 0,
+    WGSM_ACTIVE,
+    WGSM_INITIALIZING,
+    WGSM_CONNECTED,
+    WGSM_STATE_MAX
+}WAN_GSM_STATUS;
+
+#endif /* ENABLE_GSM_FOR_WAN */
+
+void initializeInterfaces( void* global );
 
 #endif /* NETINTER_H */
