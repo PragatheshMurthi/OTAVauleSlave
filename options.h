@@ -1,6 +1,18 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+
+#define MAX_ORDER_RESULT_LENGTH 32
+
+###############################################################
+##                                                           ##
+##                    CURRENT VALVE CONFIG                   ##
+##                                                           ##
+###############################################################
+
+#define SELF_VALVE_NUMBER 0
+
+
 ###############################################################
 ##                                                           ##
 ##          Network Interfaces Configuration                 ##

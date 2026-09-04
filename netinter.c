@@ -22,3 +22,7 @@ int initializeInterfaces( void ) {
 #endif /* ENABLE_GSM_FOR_WAN */
     return ERR_OK;
 }
+
+hal_sendAck
+
+hal_receive
