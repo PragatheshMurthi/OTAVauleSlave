@@ -9,10 +9,10 @@
 #include <sys/socket.h>
 
 #define IPC_MASTER_IP        "127.0.0.1"
-#define IPC_MASTER_PORT      46000U
+#define IPC_MASTER_PORT      46001U
 
 #define IPC_BROADCAST_IP     "255.255.255.255"
-#define IPC_SLAVE_PORT       46001U
+#define IPC_SLAVE_PORT          47001U
 
 #define IPC_BUFFER_SIZE      256U
 
