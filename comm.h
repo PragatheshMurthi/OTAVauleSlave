@@ -27,7 +27,7 @@ typedef struct {
     /* Data starts */
     UINT32 u32SequenceNumber;
     UINT32 u32ValveNumber;
-    CHAR acOrderStatus[MAX_ORDER_RESULT_LENGTH];
+    char acOrderStatus[MAX_ORDER_RESULT_LENGTH];
     
 } ACK_BUFFER;
 
@@ -35,6 +35,8 @@ typedef struct {
 
 PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive );
 VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer );
+
+ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalArchive );
 
 ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer );
 UINT32 calculate_crc( PVOID pvOrderBuffer, UINT16 u16OrderLength );

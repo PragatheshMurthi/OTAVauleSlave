@@ -3,8 +3,9 @@
 
 /* ================== INCLUDES ================== */
 
+#include <stdarg.h>
+#include <stdio.h>
 #include "options.h"
-#include "netinter.h"
 
 /* ================== TYPEDEFS ================== */
 
@@ -16,6 +17,7 @@ typedef char INT8;
 typedef unsigned char UINT8;
 typedef void* PVOID;
 typedef char* PCHAR;
+typedef void VOID;
 
 /* ================== ENUMS ================== */
 
@@ -62,14 +64,6 @@ typedef struct {
     UINT32 u32TimerCntS;
     UINT8 bIsTimerRunning;
 
-    #ifdef ENABLE_LORA_FOR_LAN
-    LAN_LORA_STATUS enLanLoraStatus;
-#endif /* ENABLE_LORA_FOR_LAN */
-
-#ifdef ENABLE_WIFI_FOR_WAN
-    WAN_WIFI_STATUS enWanWiFiStatus;
-#endif /* ENABLE_WIFI_FOR_WAN */
-
 #ifdef ENABLE_GSM_FOR_WAN
     WAN_GSM_STATUS enWanGSMStatus;
 #endif /* ENABLE_GSM_FOR_WAN */
@@ -77,59 +71,47 @@ typedef struct {
 
 /* ================== FUNCTION PROTOTYPES ================== */
 
-static inline void print_dbg( const char* argv, ... );
-static inline void print_err( const char* argv, ... );
-static inline void print_info( const char* argv, ... );
+static inline void print_dbg( const char* format, ... );
+static inline void print_err( const char* format, ... );
+static inline void print_info( const char* format, ... );
 static inline void set_error ( PVOID pvInstance, ERROR_CODE enCurrentErr );
 static inline ERROR_CODE get_error ( PVOID pvInstance );
 static inline PCHAR convert_err2str( ERROR_CODE enErrorCode );
 
 /* ================== INLINE FUNCTIONS ================== */
-static inline void print_dbg( const char* argv, ... ) {
+static inline void print_dbg( const char* format, ... ) {
     va_list args;
-    int done;
-
-    // 2. Initialize the argument list
     va_start(args, format);
-    done = vprintf(format, args);
+    vprintf(format, args);
     va_end(args);
-
-    return done;
 }
 
-static inline void print_err( const char* argv, ... ) {
+static inline void print_err( const char* format, ... ) {
     va_list args;
-    int done;
-
-    // 2. Initialize the argument list
     va_start(args, format);
-    done = vprintf(format, args);
+    vfprintf(stderr, format, args);
     va_end(args);
-
-    return done;
 }
 
-static inline void print_info( const char* argv, ... ) {
+static inline void print_info( const char* format, ... ) {
     va_list args;
-    int done;
-
-    // 2. Initialize the argument list
     va_start(args, format);
-    done = vprintf(format, args);
+    vprintf(format, args);
     va_end(args);
-
-    return done;
 }
 
 static inline void set_error ( PVOID pvInstance, ERROR_CODE enCurrentErr )
 {
-    ( pvInstance && (GLOBAL_ARCHIVE*)pvInstance->enInstErrStatus == ERR_OK ) ? ((*(GLOBAL_ARCHIVE)pvInstance)->enInstErrStatus = enCurrentErr ) : nullptr;
-    return;
+    if ( pvInstance ) {
+        ((GLOBAL_ARCHIVE*)pvInstance)->enInstErrStatus = enCurrentErr;
+    }
 }
 
 static inline ERROR_CODE get_error ( PVOID pvInstance )
 {
-    return (pvInstance ? ((*(GLOBAL_ARCHIVE*)pvInstance)->enInstErrStatus ) : 0);
+    if ( pvInstance )
+        return ((GLOBAL_ARCHIVE*)pvInstance)->enInstErrStatus;
+    return ERR_UNKNOWN;
 }
 
 static inline PCHAR convert_err2str( ERROR_CODE enErrorCode )

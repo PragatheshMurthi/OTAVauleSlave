@@ -1,5 +1,11 @@
-/* Headders */
+/* Headers */
 #include "gen.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stddef.h>
+#include "netinter.h"
+#include "comm.h"
+#include "valve.h"
 
 /* Prototypes */
 
@@ -19,7 +25,7 @@ void setup() {
     memset( gstInformationDB, 0, sizeof(GLOBAL_ARCHIVE));
 
   // Initialize the network modules for com.
-  enErrorCode = initializeInterfaces( gstInformationDB );
+  enErrorCode = initialize_interfaces( gstInformationDB );
   if ( enErrorCode != ERR_OK) {
       // Handle the error here
       print_err("%s:NetModInit<KO>ERR<%d>",__FUNCTION__,enErrorCode);
@@ -48,11 +54,19 @@ void startWorking (void) {
     
     PVOID pvOrderBuffer = NULL;
     // Expect Order from the master
-    pvOrderBuffer = expect_order ( &gstInformationDB );
-    parse_order( &gstInformationDB, pvOrderBuffer );
-    initiate_order( &gstInformationDB );
-    update_master( &gstInformationDB );
+    pvOrderBuffer = expect_order ( gstInformationDB );
+    parse_order( gstInformationDB, pvOrderBuffer );
+    initiate_order( gstInformationDB );
+    update_master( gstInformationDB );
 
   }
 
+}
+
+int main(int argc, char **argv)
+{
+  (void)argc;(void)argv;
+  setup();
+  startWorking();
+  return 0;
 }

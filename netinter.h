@@ -1,38 +1,8 @@
 #ifndef NETINTER_H
 #define NETINTER_H
 
-#ifdef ENABLE_LORA_FOR_LAN
-typedef ennum{
-    LLORA_INVALID - 0,
-    LLORA_ACTIVE,
-    LLORA_INITIALIZING,
-    LLORA_CONNECTED,
-    LLORA_STATE_MAX
-}LAN_LORA_STATUS;
-#endif /* ENABLE_LORA_FOR_LAN */
-
-#ifdef ENABLE_WIFI_FOR_WAN
-typedef ennum{
-    WWIFI_INVALID - 0,
-    WWIFI_ACTIVE,
-    WWIFI_INITIALIZING,
-    WWIFI_CONNECTED,
-    WWIFI_STATE_MAX
-}WAN_WIFI_STATUS;
-
-#endif /* ENABLE_WIFI_FOR_WAN */
-
-#ifdef ENABLE_GSM_FOR_WAN
-typedef ennum{
-    WGSM_INVALID - 0,
-    WGSM_ACTIVE,
-    WGSM_INITIALIZING,
-    WGSM_CONNECTED,
-    WGSM_STATE_MAX
-}WAN_GSM_STATUS;
-
-#endif /* ENABLE_GSM_FOR_WAN */
-
-void initializeInterfaces( void* global );
-
+/* enums moved to gen.h */
+ERROR_CODE initialize_interfaces( GLOBAL_ARCHIVE* pstGlobal );
+ERROR_CODE hal_send_to_master( PVOID pvData, UINT16 u16Len );
+ERROR_CODE hal_receive_from_master( PVOID *ppvData );
 #endif /* NETINTER_H */

@@ -11,10 +11,10 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
 
     if ( NULL == pstGlobalArchive )
     {
-        set_error(ERR_INVALID_PARAM);
+        set_error(pstGlobalArchive, ERR_INVALID_PARAM);
         print_err("%s:GlobalArchive<KO>", __FUNCTION__);
         DBG_EXIT
-        return ERR_INVALID_PARAM;
+        return;
     }
 
     if ( get_error( pstGlobalArchive ) != ERR_OK )
@@ -36,7 +36,7 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
             print_dbg("%s:OrderInitiated<OK><VN[%d]AT[%d]TC[%d]SS[%d]>", __FUNCTION__, pstGlobalArchive->u32VaulveNumber, pstGlobalArchive->u8ActionType, pstGlobalArchive->u32TimerCntS, pstGlobalArchive->enSlaveState);
         } else {
             print_err("%s:OrderInitiate<KO>ERR<%d>", __FUNCTION__, enErrorCode);
-            set_error( enErrorCode );
+            set_error(pstGlobalArchive, enErrorCode );
         }
 
     } else {

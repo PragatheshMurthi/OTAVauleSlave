@@ -1,5 +1,8 @@
 /* ============= INCLUDES ============= */
 #include "comm.h"
+#include "lorahal.h"
+#include "netinter.h"
+#include <string.h>
 
 /* ============= Function Definitions ============= */
 
@@ -15,14 +18,14 @@
  */
 PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
 {
-    ERROR_CODE enErroCode = ERR_OK;
+    ERROR_CODE enErrorCode = ERR_OK;
     PVOID pvOrderBuffer = NULL;
 
     DBG_ENTRY
 
     if ( NULL == pstGlobalArchive )
     {
-        set_error(ERR_INVALID_PARAM);
+        set_error(pstGlobalArchive, ERR_INVALID_PARAM);
         print_err("%s:GlobalArchive<KO>", __FUNCTION__);
         DBG_EXIT
         return NULL;
@@ -35,7 +38,7 @@ PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
         return NULL;
     }
     
-    enErroCode = hal_receive( pvOrderBuffer );
+    enErrorCode = hal_receive_from_master( &pvOrderBuffer );
 
     if ( enErrorCode == ERR_OK && NULL != pvOrderBuffer )
     {
@@ -46,11 +49,11 @@ PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
         {
             // Handle integrity check failure
             print_err("%s:OrderIntegrityCheck<KO>ERR<%d>", __FUNCTION__, enErrorCode);
-            set_error( enErrorCode );
+            set_error(pstGlobalArchive, enErrorCode );
         }
     } else {
         print_err("%s:OrderRecieve<KO>ERR<%d>", __FUNCTION__, enErrorCode);
-        set_error( enErrorCode );
+        set_error(pstGlobalArchive, enErrorCode );
     }
 
     print_info("%s:OrderRecieved<OK><OB[%p]><%d>", __FUNCTION__, pvOrderBuffer, enErrorCode);
@@ -72,28 +75,26 @@ ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer )
     UINT32 u32CalculatedCRC = 0;
     UINT32 u32ReceivedCRC   = 0;
     UINT16 u16OrderLength   = 0;
-]
     DBG_ENTRY
 
     if ( NULL == pvOrderBuffer )
     {
         print_err("%s:OrderBuffer<KO><NULL>", __FUNCTION__);
-        set_error(ERR_INVALID_PARAM);
         DBG_EXIT
         return ERR_INVALID_PARAM;
     }
 
-    u16OrderLength = ((ORDER_BUFFER*)pvOrderBuffer)->u32OrderLength;
+    u16OrderLength = (UINT16)((ORDER_BUFFER*)pvOrderBuffer)->u32OrderLength;
     u32ReceivedCRC = ((ORDER_BUFFER*)pvOrderBuffer)->u32OrderCRC;
 
     print_dbg("%s:OrderIntegrityCheck<OK><OB[%p]OL[%d]RC[%d]>", __FUNCTION__, pvOrderBuffer, u16OrderLength, u32ReceivedCRC);
 
+    ((ORDER_BUFFER*)pvOrderBuffer)->u32OrderCRC = 0; // Reset CRC field before calculation
     u32CalculatedCRC = calculate_crc( pvOrderBuffer, u16OrderLength );
 
     if ( u32ReceivedCRC != u32CalculatedCRC )
     {
         print_err("%s:OrderIntegrityCheck<KO><OB[%p]OL[%d]RC[%d]CC[%d]>", __FUNCTION__, pvOrderBuffer, u16OrderLength, u32ReceivedCRC, u32CalculatedCRC);
-        set_error(ERR_INTEGRITY_CHECK_FAILED);
         DBG_EXIT
         return ERR_INTEGRITY_CHECK_FAILED;
     }
@@ -113,9 +114,33 @@ ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer )
  */
 UINT32 calculate_crc( PVOID pvOrderBuffer, UINT16 u16OrderLength )
 {
-    // Note: ~0UL initializes the context to 0xFFFFFFFF
-    // esp_rom_crc32_le calculates little-endian CRC-32 (standard Ethernet IEEE 802.3)
-    return esp_rom_crc32_le(~0UL, pvOrderBuffer, u16OrderLength) ^ 0xFFFFFFFF;
+    if ( pvOrderBuffer == NULL ) return 0;
+
+#ifdef ENABLE_IPC_SIMULATION
+
+    const UINT8 *pucData = (const UINT8 *)pvOrderBuffer;
+    UINT32 u32Crc = 0xFFFFFFFFu;
+
+    if (pvOrderBuffer == NULL || u16OrderLength == 0U) {
+        return 0U;
+    }
+
+    for (UINT16 u16Index = 0U; u16Index < u16OrderLength; ++u16Index) {
+        u32Crc ^= (UINT32)pucData[u16Index];
+        for (UINT8 u8Bit = 0U; u8Bit < 8U; ++u8Bit) {
+            if ((u32Crc & 1U) != 0U) {
+                u32Crc = (u32Crc >> 1U) ^ 0xEDB88320u;
+            } else {
+                u32Crc >>= 1U;
+            }
+        }
+    }
+
+    return (~u32Crc);
+#else
+    return esp_rom_crc32_le(0, (const uint8_t *)pvOrderBuffer, u16OrderLength);
+#endif
+
 }
 
 /* ============== SEND IMPLEMENTATION ============== */
@@ -132,21 +157,21 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
         set_error(pstGlobalArchive, ERR_INVALID_PARAM);
         print_err("%s:GlobalArchive<KO>", __FUNCTION__);
         DBG_EXIT
-        return ERR_INVALID_PARAM;
+        return;
     }
 
     if ( pstGlobalArchive->enSlaveState == SLAVE_ORDER_PROCESSED )
     {
-        strncpy(&(stAckBuffer.acOrderStatus), "ORDER_PROCESSED", sizeof(stAckBuffer.acOrderStatus) - 1);
+        strncpy(stAckBuffer.acOrderStatus, "ORDER_PROCESSED", sizeof(stAckBuffer.acOrderStatus) - 1);
         stAckBuffer.acOrderStatus[sizeof(stAckBuffer.acOrderStatus) - 1] = '\0';
     } else {
-        strncpy(&(stAckBuffer.acOrderStatus), convert_err2str(get_error(pstGlobalArchive)), sizeof(stAckBuffer.acOrderStatus) - 1);
+        strncpy(stAckBuffer.acOrderStatus, convert_err2str(get_error(pstGlobalArchive)), sizeof(stAckBuffer.acOrderStatus) - 1);
         stAckBuffer.acOrderStatus[sizeof(stAckBuffer.acOrderStatus) - 1] = '\0';
     }
 
-    if ( fill_ack_buffer( &stAckBuffer.acOrderStatus, sizeof(stAckBuffer.acOrderStatus), pstGlobalArchive ) != ERR_OK )
+    if ( fill_ack_buffer( &stAckBuffer, pstGlobalArchive ) != ERR_OK )
     {
-        strncpy(&(stAckBuffer.acOrderStatus), "STATUS_POPULATION_FAILED", sizeof(stAckBuffer.acOrderStatus) - 1);
+        strncpy(stAckBuffer.acOrderStatus, "STATUS_POPULATION_FAILED", sizeof(stAckBuffer.acOrderStatus) - 1);
         stAckBuffer.acOrderStatus[sizeof(stAckBuffer.acOrderStatus) - 1] = '\0';
         print_err("%s:FailedToFillAckBuffer<KO>", __FUNCTION__);
     }
@@ -154,9 +179,9 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
     stAckBuffer.u32OrderCRC = calculate_crc( &stAckBuffer, sizeof(stAckBuffer) );
     stAckBuffer.u32OrderLength = sizeof(stAckBuffer);
     
-    enErrorCode = hal_send( &stAckBuffer, sizeof(stAckBuffer) );
+    enErrorCode = hal_send_to_master( &stAckBuffer, sizeof(stAckBuffer) );
 
-    if ( enErrorCode == ERR_OK && NULL != &stAckBuffer )
+    if ( enErrorCode == ERR_OK )
     {
         print_dbg("%s:AckSent<OK><AB[%p]><%d>", __FUNCTION__, &stAckBuffer, enErrorCode);
     } else {
@@ -164,14 +189,14 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
     }
 
     DBG_EXIT
-    return enErrorCode;
+    return;
 }
 
-ERROR_CODE fill_ack_buffer( PCHAR pchAckStatus, UINT16 u16AckLength, GLOBAL_ARCHIVE* pstGlobalArchive )
+ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalArchive )
 {
-    if ( NULL == pchAckStatus || NULL == pstGlobalArchive )
+    if ( NULL == pstAckBuffer || NULL == pstGlobalArchive )
     {
-        print_err("%s:AckBufferOrGlobalArchive<KO><AB[%p]GA[%p]>", __FUNCTION__, pchAckStatus, pstGlobalArchive);
+        print_err("%s:AckBufferOrGlobalArchive<KO><AB[%p]GA[%p]>", __FUNCTION__, pstAckBuffer, pstGlobalArchive);
         return ERR_INVALID_PARAM;
     }
 
@@ -180,32 +205,23 @@ ERROR_CODE fill_ack_buffer( PCHAR pchAckStatus, UINT16 u16AckLength, GLOBAL_ARCH
         case ERR_OK:
             if ( pstGlobalArchive->enSlaveState == SLAVE_ORDER_PROCESSED )
             {
-                strncpy(pchAckStatus, "ORDER_PROCESSED", u16AckLength - 1);
-                pchAckStatus[u16AckLength - 1] = '\0';
+                strncpy(pstAckBuffer->acOrderStatus, "ORDER_PROCESSED", sizeof(pstAckBuffer->acOrderStatus) - 1);
+                pstAckBuffer->acOrderStatus[sizeof(pstAckBuffer->acOrderStatus) - 1] = '\0';
             } else {
-                strncpy(pchAckStatus, "ORDER_IN_PROGRESS", u16AckLength - 1);
-                pchAckStatus[u16AckLength - 1] = '\0';
+                strncpy(pstAckBuffer->acOrderStatus, "ORDER_IN_PROGRESS", sizeof(pstAckBuffer->acOrderStatus) - 1);
+                pstAckBuffer->acOrderStatus[sizeof(pstAckBuffer->acOrderStatus) - 1] = '\0';
             }
             break;
-        case ERR_NET_IF_FAIL:
-        case ERR_INVALID_PARAM:
-        case ERR_INVALID_STATE:
-        case ERR_MEMORY_ALLOCATION_FAIL:
-        case ERR_INTEGRITY_CHECK_FAILED:
-        case ERR_ORDER_NOT_FR_SELF:
-        case ERR_STALE_ORDER:
-            strncpy(pchAckStatus, "STALE_ORDER", u16AckLength - 1);
-            pchAckStatus[u16AckLength - 1] = '\0';  
         default:
-            strncpy(&(pstAckBuffer->acOrderStatus), "STATUS_POPULATION_FAILED", u16AckLength - 1);
-            pstAckBuffer->acOrderStatus[u16AckLength - 1] = '\0';
+            strncpy(pstAckBuffer->acOrderStatus, "STATUS_POPULATION_FAILED", sizeof(pstAckBuffer->acOrderStatus) - 1);
+            pstAckBuffer->acOrderStatus[sizeof(pstAckBuffer->acOrderStatus) - 1] = '\0';
             break;
     }
 
     pstAckBuffer->u32SequenceNumber = pstGlobalArchive->u32CurrSequence;
     pstAckBuffer->u32ValveNumber = pstGlobalArchive->u32VaulveNumber;
     
-    print_dbg("%s:AckBufferFilled<OK><AB[%p]VN[%d]SN[%d]AT[%d]TC[%d]>", __FUNCTION__, pstAckBuffer, pstAckBuffer->u32VaulveNumber, pstAckBuffer->u32OrderSequenceNumber, pstAckBuffer->u8ActionType, pstAckBuffer->u32TimerCntS);
+    print_dbg("%s:AckBufferFilled<OK><AB[%p]VN[%d]SN[%d]>", __FUNCTION__, pstAckBuffer, pstAckBuffer->u32ValveNumber, pstAckBuffer->u32SequenceNumber);
 
     return ERR_OK;
 }
