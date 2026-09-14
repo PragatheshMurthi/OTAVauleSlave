@@ -1,5 +1,8 @@
 /* ========= INCLUDES ========= */
 #include "valve.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
 /* ========= FUNCTIONS ========= */
 
@@ -50,9 +53,20 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
 ERROR_CODE hal_actuate_valve( UINT8 u8ActionType )
 {
     // This function should contain the hardware-specific implementation to actuate the valve.
-    // For now, we will just simulate the action and return success.
+    // For now, we will just simulate the action with a random delay and return success.
+    unsigned int u32RandomDelay;
+    
     DBG_ENTRY
     print_dbg("%s:HalActuateValve<Simulated><AT[%d]>", __FUNCTION__, u8ActionType );
+    
+    // Generate random delay between 0 and 5 seconds
+    u32RandomDelay = (unsigned int)(rand() % 6);  // 0-5 seconds
+    print_info("%s:Simulated valve actuation delay: %u seconds", __FUNCTION__, u32RandomDelay);
+    
+    // Sleep for the random duration
+    sleep(u32RandomDelay);
+    
+    print_info("%s:Valve actuation completed after %u seconds", __FUNCTION__, u32RandomDelay);
     DBG_EXIT
     // Simulate a successful initiation
     return ERR_OK;

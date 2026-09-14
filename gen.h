@@ -84,6 +84,7 @@ static inline void print_dbg( const char* format, ... ) {
     va_start(args, format);
     vprintf(format, args);
     va_end(args);
+    printf("\n");
 }
 
 static inline void print_err( const char* format, ... ) {
@@ -91,6 +92,7 @@ static inline void print_err( const char* format, ... ) {
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
+    printf("\n");
 }
 
 static inline void print_info( const char* format, ... ) {
@@ -98,6 +100,7 @@ static inline void print_info( const char* format, ... ) {
     va_start(args, format);
     vprintf(format, args);
     va_end(args);
+    printf("\n");
 }
 
 static inline void set_error ( PVOID pvInstance, ERROR_CODE enCurrentErr )

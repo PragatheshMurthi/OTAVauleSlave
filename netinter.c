@@ -58,5 +58,5 @@ ERROR_CODE hal_receive_from_master( PVOID *ppvData ) {
 #endif /* ENABLE_IPC_SIMULATION */
 
     DBG_EXIT
-    return ERR_NET_IF_FAIL;
+    return ERR_OK;
 }

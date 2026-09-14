@@ -11,6 +11,7 @@
 
 // Main routine
 void startWorking (void);
+void cleanup (void);
 
 /* Global variables */
 static GLOBAL_ARCHIVE *gstInformationDB;
@@ -21,18 +22,24 @@ void setup() {
 
   // Create memory for the global information data base.
   gstInformationDB = malloc ( sizeof ( GLOBAL_ARCHIVE ));
-  if ( NULL != gstInformationDB )
-    memset( gstInformationDB, 0, sizeof(GLOBAL_ARCHIVE));
+  if ( NULL == gstInformationDB ) {
+    print_err("setup:MemoryAllocationFailed<KO>SIZE<%zu>", sizeof(GLOBAL_ARCHIVE));
+    return;
+  }
+  
+  memset( gstInformationDB, 0, sizeof(GLOBAL_ARCHIVE));
 
   // Initialize the network modules for com.
   enErrorCode = initialize_interfaces( gstInformationDB );
   if ( enErrorCode != ERR_OK) {
       // Handle the error here
       print_err("%s:NetModInit<KO>ERR<%d>",__FUNCTION__,enErrorCode);
+      free( gstInformationDB );
+      gstInformationDB = NULL;
       return;
   }
 
-  gstInformationDB ? gstInformationDB->enSlaveState = SLAVE_READY : NULL;
+  gstInformationDB->enSlaveState = SLAVE_READY;
 }
 
 void loop() {
@@ -40,6 +47,7 @@ void loop() {
   // All the core listening functionalities...
   startWorking();
   print_dbg("Work halted...");
+  cleanup();
 
 }
 
@@ -63,10 +71,19 @@ void startWorking (void) {
 
 }
 
+void cleanup (void) {
+  if ( NULL != gstInformationDB ) {
+    // Free the global archive database
+    free( gstInformationDB );
+    gstInformationDB = NULL;
+    print_dbg("Global Archive DB cleaned up");
+  }
+}
+
 int main(int argc, char **argv)
 {
   (void)argc;(void)argv;
   setup();
-  startWorking();
+  loop();
   return 0;
 }

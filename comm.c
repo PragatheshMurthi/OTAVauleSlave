@@ -176,8 +176,9 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
         print_err("%s:FailedToFillAckBuffer<KO>", __FUNCTION__);
     }
 
-    stAckBuffer.u32OrderCRC = calculate_crc( &stAckBuffer, sizeof(stAckBuffer) );
     stAckBuffer.u32OrderLength = sizeof(stAckBuffer);
+    stAckBuffer.u32OrderCRC = calculate_crc( &stAckBuffer, sizeof(stAckBuffer) );
+    
     
     enErrorCode = hal_send_to_master( &stAckBuffer, sizeof(stAckBuffer) );
 
@@ -187,7 +188,7 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
     } else {
         print_err("%s:AckSend<KO>ERR<%d>", __FUNCTION__, enErrorCode);
     }
-
+    set_error(pstGlobalArchive, ERR_OK); // Reset error status after sending acknowledgment
     DBG_EXIT
     return;
 }
@@ -258,7 +259,7 @@ VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer )
     /* Pre-condition to evaluate the self valve number */
     if ( SELF_VALVE_NUMBER != ((ORDER_BUFFER*)pvOrderBuffer)->u32VaulveNumber )
     {
-        print_dbg("%s:OrderValveNumber<KO><OB[%p]VN[%d]CN[%d]>", __FUNCTION__, pvOrderBuffer, SELF_VALVE_NUMBER, ((ORDER_BUFFER*)pvOrderBuffer)->u32VaulveNumber);
+        printf("%s:OrderValveNumber<KO><OB[%p]VN[%d]CN[%d]>\n", __FUNCTION__, pvOrderBuffer, SELF_VALVE_NUMBER, ((ORDER_BUFFER*)pvOrderBuffer)->u32VaulveNumber);
         set_error(pstGlobalArchive, ERR_ORDER_NOT_FR_SELF);
         DBG_EXIT
         return;
@@ -272,6 +273,9 @@ VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer )
         DBG_EXIT
         return;
     }
+
+    // Update the global archive with the new order details
+    pstGlobalArchive->pvCurrentOrder = pvOrderBuffer;
 
     if ( NULL != pstGlobalArchive->pvCurrentOrder )
     {
