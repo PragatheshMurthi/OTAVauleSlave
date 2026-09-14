@@ -1,13 +1,27 @@
+/*******************************************************************************
+ * @file        gen.h
+ * @brief       General definitions, typedefs, enums, and macros for the system.
+ * @author      Pragathesh Murthi <pragathesh.murthi@example.com>
+ * @date        2024-04-20
+ * 
+ * @license     MIT License
+ *              Copyright (c) 2024 Valve Control System
+ *              All rights reserved.
+ ******************************************************************************/
+
 #ifndef GEN_H
 #define GEN_H
 
-/* ================== INCLUDES ================== */
-
+/*============================================================================*/
+/*                                  INCLUDES                                  */
+/*============================================================================*/
 #include <stdarg.h>
 #include <stdio.h>
 #include "options.h"
 
-/* ================== TYPEDEFS ================== */
+/*============================================================================*/
+/*                              TYPEDEFS & ENUMS                              */
+/*============================================================================*/
 
 typedef int INT32;
 typedef unsigned int UINT32;
@@ -43,12 +57,15 @@ typedef enum {
     SLAVE_ORDER_PROCESSED
 } SLAVE_STATUS;
 
-/* ================== DEFINE ================== */
-
+/*============================================================================*/
+/*                         DEFINES & MACROS & DEBUG                           */
+/*============================================================================*/
 #define DBG_ENTRY print_dbg("%s:Entry", __FUNCTION__);
 #define DBG_EXIT print_dbg("%s:Exit", __FUNCTION__); 
 
-/* ================== STRUCTURES ================== */
+/*============================================================================*/
+/*                           STRUCTURES & UNIONS                              */
+/*============================================================================*/
 
 typedef struct {
 
@@ -59,7 +76,7 @@ typedef struct {
     UINT32 u32CurrSequence;
 
     /* Order Data */
-    UINT32 u32VaulveNumber;
+    UINT32 u32ValveNumber;
     UINT8 u8ActionType;
     UINT32 u32TimerCntS;
     UINT8 bIsTimerRunning;
@@ -69,13 +86,53 @@ typedef struct {
 #endif /* ENABLE_GSM_FOR_WAN */
 }GLOBAL_ARCHIVE;
 
-/* ================== FUNCTION PROTOTYPES ================== */
-
+/*============================================================================*/
+/*                        INLINE FUNCTION PROTOTYPES                          */
+/*============================================================================*/
+/**
+ * @brief Prints debug message with variable arguments to stdout.
+ * @param format String format specifier
+ * @param ... Variable argument list
+ * @return void
+ */
 static inline void print_dbg( const char* format, ... );
+
+/**
+ * @brief Prints error message with variable arguments to stderr.
+ * @param format String format specifier
+ * @param ... Variable argument list
+ * @return void
+ */
 static inline void print_err( const char* format, ... );
+
+/**
+ * @brief Prints informational message with variable arguments to stdout.
+ * @param format String format specifier
+ * @param ... Variable argument list
+ * @return void
+ */
 static inline void print_info( const char* format, ... );
+
+/**
+ * @brief Sets error code in the global archive instance.
+ * @param [in] pvInstance Pointer to GLOBAL_ARCHIVE instance
+ * @param [in] enCurrentErr Error code to set
+ * @return void
+ */
 static inline void set_error ( PVOID pvInstance, ERROR_CODE enCurrentErr );
+
+/**
+ * @brief Retrieves current error code from global archive instance.
+ * @param [in] pvInstance Pointer to GLOBAL_ARCHIVE instance
+ * @return ERROR_CODE Current error code
+ */
 static inline ERROR_CODE get_error ( PVOID pvInstance );
+
+/**
+ * @brief Converts error code to human-readable string.
+ * @param [in] enErrorCode Error code to convert
+ * @return PCHAR Pointer to error description string
+ */
 static inline PCHAR convert_err2str( ERROR_CODE enErrorCode );
 
 /* ================== INLINE FUNCTIONS ================== */

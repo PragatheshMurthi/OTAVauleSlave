@@ -6,7 +6,8 @@
 
 /* ************** CURRENT VALVE CONFIG **************/
 
-#define SELF_VALVE_NUMBER 0
+#define MAX_VALVES 4
+
 
 /* Network Interfaces Configuration */
 
@@ -22,6 +23,10 @@
 #define ENABLE_UART_LOG
 //#define ENABLE_NETWORK_LOGG
 
-
+// Valve to GPIO mapping configuration                  Valve number    GPIO Pin
+static char au8AssValves[MAX_VALVES][2] = {     {               0,          1}, 
+                                                {               1,          2}, 
+                                                {/* Invalid*/  -1,          3}, 
+                                                {/* Invalid*/  -1,          4} };
 #endif /* OPTIONS_H */
 

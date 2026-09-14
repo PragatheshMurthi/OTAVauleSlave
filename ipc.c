@@ -1,22 +1,47 @@
-#include "ipc.h"
+/*******************************************************************************
+ * @file        ipc.c
+ * @brief       IPC (Inter-Process Communication) network interface implementation.
+ * @author      Pragathesh Murthi <pragathesh.murthi@example.com>
+ * @date        2024-04-20
+ * 
+ * @license     MIT License
+ *              Copyright (c) 2024 Valve Control System
+ *              All rights reserved.
+ ******************************************************************************/
 
+/*============================================================================*/
+/*                                  INCLUDES                                  */
+/*============================================================================*/
+#include "ipc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+/*============================================================================*/
+/*                         DEFINES & MACROS & ENUMS                           */
+/*============================================================================*/
 #define IPC_MASTER_IP        "127.0.0.1"
 #define IPC_MASTER_PORT      46001U
-
 #define IPC_BROADCAST_IP     "255.255.255.255"
-#define IPC_SLAVE_PORT          47001U
-
+#define IPC_SLAVE_PORT       47001U
 #define IPC_BUFFER_SIZE      256U
 
+/*============================================================================*/
+/*                            FUNCTION PROTOTYPES                             */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                          GLOBAL / STATIC VARIABLES                         */
+/*============================================================================*/
 static int g_iIpcSocket = -1;
+
+/*============================================================================*/
+/*                           FUNCTION DEFINITIONS                             */
+/*============================================================================*/
 
 
 /*

@@ -9,13 +9,6 @@
 
 /* ============== RECEIVER IMPLEMENTATION ============== */
 
-/*
- * Expects an order from the network and processes it.
- *
- * Parameters:
- *   pstGlobalArchive - Pointer to the global archive structure.
- * 
- */
 PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
 {
     ERROR_CODE enErrorCode = ERR_OK;
@@ -62,14 +55,6 @@ PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
     return pvOrderBuffer;
 }
 
-/*
- * Evaluates the integrity of the received order using CRC.
- *
- * Parameters:
- *   pvOrderBuffer - Pointer to the order buffer.
- * Returns:
- *   ERROR_CODE - Status of the integrity check.
- */
 ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer )
 {
     UINT32 u32CalculatedCRC = 0;
@@ -103,15 +88,6 @@ ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer )
     return ERR_OK;
 }
 
-/*
- * Calculates the CRC for the given order buffer.
- *
- * Parameters:
- *   pvOrderBuffer - Pointer to the order buffer.
- *   u16OrderLength - Length of the order.
- * Returns:
- *   UINT32 - Calculated CRC value.
- */
 UINT32 calculate_crc( PVOID pvOrderBuffer, UINT16 u16OrderLength )
 {
     if ( pvOrderBuffer == NULL ) return 0;
@@ -220,7 +196,7 @@ ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalA
     }
 
     pstAckBuffer->u32SequenceNumber = pstGlobalArchive->u32CurrSequence;
-    pstAckBuffer->u32ValveNumber = pstGlobalArchive->u32VaulveNumber;
+    pstAckBuffer->u32ValveNumber = pstGlobalArchive->u32ValveNumber;
     
     print_dbg("%s:AckBufferFilled<OK><AB[%p]VN[%d]SN[%d]>", __FUNCTION__, pstAckBuffer, pstAckBuffer->u32ValveNumber, pstAckBuffer->u32SequenceNumber);
 
@@ -229,13 +205,6 @@ ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalA
 
 /* ============== PARSER IMPLEMENTATION ============== */
 
-/*
- * Parses the received order and updates the global archive with order details.
- *
- * Parameters:
- *  pstGlobalArchive - Pointer to the global archive structure.
- *  pvOrderBuffer - Pointer to the order buffer.
- */
 VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer )
 {
     
@@ -256,14 +225,27 @@ VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer )
         return;
     }
 
-    /* Pre-condition to evaluate the self valve number */
-    if ( SELF_VALVE_NUMBER != ((ORDER_BUFFER*)pvOrderBuffer)->u32VaulveNumber )
+    UINT8 u8TmpValveMax = 0;
+    while ( u8TmpValveMax < MAX_VALVES ) {
+    
+        /* Pre-condition to evaluate the self valve number */
+        if ( au8AssValves[u8TmpValveMax][0] == ((ORDER_BUFFER*)pvOrderBuffer)->u32ValveNumber )
+        {
+            print_dbg("%s:OrderValveNumber<OK><OB[%p]VN[%d]CN[%d]>", __FUNCTION__, pvOrderBuffer, au8AssValves[u8TmpValveMax][0], ((ORDER_BUFFER*)pvOrderBuffer)->u32ValveNumber);
+            break;
+        }
+        
+        u8TmpValveMax++;
+    }
+
+    if ( u8TmpValveMax == MAX_VALVES )
     {
-        printf("%s:OrderValveNumber<KO><OB[%p]VN[%d]CN[%d]>\n", __FUNCTION__, pvOrderBuffer, SELF_VALVE_NUMBER, ((ORDER_BUFFER*)pvOrderBuffer)->u32VaulveNumber);
+        printf("%s:OrderValveNumber<KO><OB[%p]VN[%d]CN[%d]>\n", __FUNCTION__, pvOrderBuffer, au8AssValves[0][0], ((ORDER_BUFFER*)pvOrderBuffer)->u32ValveNumber);
         set_error(pstGlobalArchive, ERR_ORDER_NOT_FR_SELF);
         DBG_EXIT
         return;
     }
+
 
     /* Pre-condition to evaluate the Sequence number */
     if ( ((ORDER_BUFFER*)pvOrderBuffer)->u32OrderSequenceNumber <= pstGlobalArchive->u32CurrSequence )
@@ -280,13 +262,13 @@ VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer )
     if ( NULL != pstGlobalArchive->pvCurrentOrder )
     {
 
-        pstGlobalArchive->u32VaulveNumber   = ((ORDER_BUFFER*)pstGlobalArchive->pvCurrentOrder)->u32VaulveNumber;
+        pstGlobalArchive->u32ValveNumber   = ((ORDER_BUFFER*)pstGlobalArchive->pvCurrentOrder)->u32ValveNumber;
         pstGlobalArchive->u8ActionType      = ((ORDER_BUFFER*)pstGlobalArchive->pvCurrentOrder)->u8ActionType;
         pstGlobalArchive->u32TimerCntS      = ((ORDER_BUFFER*)pstGlobalArchive->pvCurrentOrder)->u32TimerCntS;
         pstGlobalArchive->bIsTimerRunning    = (pstGlobalArchive->u32TimerCntS > 0) ? 1 : 0;
         pstGlobalArchive->u32CurrSequence    = ((ORDER_BUFFER*)pstGlobalArchive->pvCurrentOrder)->u32OrderSequenceNumber;
 
-        print_dbg("%s:OrderParsed<OK><OB[%p]VN[%d]AT[%d]TC[%d]>", __FUNCTION__, pstGlobalArchive->pvCurrentOrder, pstGlobalArchive->u32VaulveNumber, pstGlobalArchive->u8ActionType, pstGlobalArchive->u32TimerCntS);
+        print_dbg("%s:OrderParsed<OK><OB[%p]VN[%d]AT[%d]TC[%d]>", __FUNCTION__, pstGlobalArchive->pvCurrentOrder, pstGlobalArchive->u32ValveNumber, pstGlobalArchive->u8ActionType, pstGlobalArchive->u32TimerCntS);
 
     }
 

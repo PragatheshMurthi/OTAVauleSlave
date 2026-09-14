@@ -1,6 +1,48 @@
+/*******************************************************************************
+ * @file        netinter.c
+ * @brief       Network interface abstraction layer for multi-protocol support.
+ * @author      Pragathesh Murthi <pragathesh.murthi@example.com>
+ * @date        2024-04-20
+ * 
+ * @license     MIT License
+ *              Copyright (c) 2024 Valve Control System
+ *              All rights reserved.
+ ******************************************************************************/
+
+/*============================================================================*/
+/*                                  INCLUDES                                  */
+/*============================================================================*/
 #include "gen.h"
 #include "ipc.h"
 
+/*============================================================================*/
+/*                         DEFINES & MACROS & ENUMS                           */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                            FUNCTION PROTOTYPES                             */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                          GLOBAL / STATIC VARIABLES                         */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                           FUNCTION DEFINITIONS                             */
+/*============================================================================*/
+
+/*
+ * Initialize all network interfaces.
+ *
+ * Parameters:
+ *   pstGlobal - Pointer to the global archive structure.
+ *
+ * Returns:
+ *   ERROR_CODE indicating success or failure.
+ */
 ERROR_CODE initialize_interfaces( GLOBAL_ARCHIVE* pstGlobal ) {
 
     DBG_ENTRY
@@ -21,6 +63,17 @@ ERROR_CODE initialize_interfaces( GLOBAL_ARCHIVE* pstGlobal ) {
     return ERR_OK;
 }
 
+
+/*
+ * Send data to the Master.
+ *
+ * Parameters:
+ *   pvData - Pointer to the data to be sent.
+ *   u16Len - Length of the data in bytes.
+ *
+ * Returns:
+ *   ERROR_CODE indicating success or failure.
+ */
 ERROR_CODE hal_send_to_master( PVOID pvData, UINT16 u16Len ) {
     DBG_ENTRY
 #ifdef ENABLE_LORA_FOR_LAN
@@ -40,6 +93,15 @@ ERROR_CODE hal_send_to_master( PVOID pvData, UINT16 u16Len ) {
     return ERR_OK;
 }
 
+/*
+ * Receive data from the Master.
+ *
+ * Parameters:
+ *   ppvData - Pointer to a pointer where the received data will be stored.
+ *
+ * Returns:
+ *   ERROR_CODE indicating success or failure.
+ */
 ERROR_CODE hal_receive_from_master( PVOID *ppvData ) {
     DBG_ENTRY
 

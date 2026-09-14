@@ -1,4 +1,17 @@
-/* Headers */
+/*******************************************************************************
+ * @file        main.c
+ * @brief       Main entry point and core event loop for the OTA Valve Slave.
+ * @author      Pragathesh Murthi <pragathesh.murthi@example.com>
+ * @date        2024-04-20
+ * 
+ * @license     MIT License
+ *              Copyright (c) 2024 Valve Control System
+ *              All rights reserved.
+ ******************************************************************************/
+
+/*============================================================================*/
+/*                                  INCLUDES                                  */
+/*============================================================================*/
 #include "gen.h"
 #include <stdlib.h>
 #include <string.h>
@@ -7,13 +20,25 @@
 #include "comm.h"
 #include "valve.h"
 
-/* Prototypes */
+/*============================================================================*/
+/*                         DEFINES & MACROS & ENUMS                           */
+/*============================================================================*/
+/* None */
 
-// Main routine
-void startWorking (void);
-void cleanup (void);
+/*============================================================================*/
+/*                            FUNCTION PROTOTYPES                             */
+/*============================================================================*/
+void startWorking(void);
+void cleanup(void);
 
-/* Global variables */
+/*============================================================================*/
+/*                          GLOBAL / STATIC VARIABLES                         */
+/*============================================================================*/
+static GLOBAL_ARCHIVE *gstInformationDB;
+
+/*============================================================================*/
+/*                           FUNCTION DEFINITIONS                             */
+/*============================================================================*/
 static GLOBAL_ARCHIVE *gstInformationDB;
 
 /* Defenitions */
@@ -43,12 +68,9 @@ void setup() {
 }
 
 void loop() {
-
   // All the core listening functionalities...
   startWorking();
   print_dbg("Work halted...");
-  cleanup();
-
 }
 
 void startWorking (void) {
@@ -68,6 +90,7 @@ void startWorking (void) {
     update_master( gstInformationDB );
 
   }
+  cleanup();
 
 }
 
@@ -80,6 +103,7 @@ void cleanup (void) {
   }
 }
 
+#ifdef ENABLE_IPC_SIMULATION
 int main(int argc, char **argv)
 {
   (void)argc;(void)argv;
@@ -87,3 +111,4 @@ int main(int argc, char **argv)
   loop();
   return 0;
 }
+#endif

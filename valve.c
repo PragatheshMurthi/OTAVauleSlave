@@ -1,10 +1,40 @@
-/* ========= INCLUDES ========= */
+/*******************************************************************************
+ * @file        valve.c
+ * @brief       Valve actuation control and order initiation module.
+ * @author      Pragathesh Murthi <pragathesh.murthi@example.com>
+ * @date        2024-04-20
+ * 
+ * @license     MIT License
+ *              Copyright (c) 2024 Valve Control System
+ *              All rights reserved.
+ ******************************************************************************/
+
+/*============================================================================*/
+/*                                  INCLUDES                                  */
+/*============================================================================*/
 #include "valve.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
 
-/* ========= FUNCTIONS ========= */
+/*============================================================================*/
+/*                         DEFINES & MACROS & ENUMS                           */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                            FUNCTION PROTOTYPES                             */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                          GLOBAL / STATIC VARIABLES                         */
+/*============================================================================*/
+/* None */
+
+/*============================================================================*/
+/*                           FUNCTION DEFINITIONS                             */
+/*============================================================================*/
 
 VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
 {
@@ -36,7 +66,7 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
         if ( enErrorCode == ERR_OK )
         {
             pstGlobalArchive->enSlaveState = SLAVE_ORDER_PROCESSED;
-            print_dbg("%s:OrderInitiated<OK><VN[%d]AT[%d]TC[%d]SS[%d]>", __FUNCTION__, pstGlobalArchive->u32VaulveNumber, pstGlobalArchive->u8ActionType, pstGlobalArchive->u32TimerCntS, pstGlobalArchive->enSlaveState);
+            print_dbg("%s:OrderInitiated<OK><VN[%d]AT[%d]TC[%d]SS[%d]>", __FUNCTION__, pstGlobalArchive->u32ValveNumber, pstGlobalArchive->u8ActionType, pstGlobalArchive->u32TimerCntS, pstGlobalArchive->enSlaveState);
         } else {
             print_err("%s:OrderInitiate<KO>ERR<%d>", __FUNCTION__, enErrorCode);
             set_error(pstGlobalArchive, enErrorCode );
