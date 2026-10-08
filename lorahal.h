@@ -17,6 +17,10 @@
 /*============================================================================*/
 #include "gen.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*============================================================================*/
 /*                           FUNCTION PROTOTYPES                              */
 /*============================================================================*/
@@ -40,5 +44,9 @@ ERROR_CODE send_LoRa( PVOID pvData, UINT16 u16Len );
  * @return ERROR_CODE ERR_OK on success, error code on failure
  */
 ERROR_CODE receive_LoRa( PVOID *ppvData );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LORAHAL_H */

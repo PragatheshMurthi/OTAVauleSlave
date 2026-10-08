@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
-project(OTAVauleControl C)
+project(OTAVauleControl C CXX)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SRC_FILES
     main.c
     netinter.c
-    lorahal.c
     ipc.c
     comm.c
     valve.c

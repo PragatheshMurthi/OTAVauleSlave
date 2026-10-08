@@ -20,7 +20,8 @@ What changed
 ------------
 
 - Fixed multiple prototype and header errors so the code compiles.
-- Added simple HAL simulation in `lorahal.c` (simulated send/receive).
+- Added the Sandeep Mistry LoRa HAL in `lorahal.cpp`, with a host simulation
+	fallback for builds without Arduino and the LoRa library.
 - Added `CMakeLists.txt` and `main()` to run the simulation.
 
 Notes
