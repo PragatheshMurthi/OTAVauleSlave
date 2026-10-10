@@ -1,6 +1,6 @@
 /*******************************************************************************
- * @file        ipc.h
- * @brief       IPC (Inter-Process Communication) interface header.
+ * @file        lorahal.h
+ * @brief       LoRa HAL (Hardware Abstraction Layer) interface header.
  * @author      Pragathesh Murthi <pragathesh.murthi@example.com>
  * @date        2024-04-20
  * 
@@ -9,38 +9,44 @@
  *              All rights reserved.
  ******************************************************************************/
 
-#ifndef IPC_H
-#define IPC_H
+#ifndef LORAHAL_H
+#define LORAHAL_H
 
 /*============================================================================*/
 /*                                  INCLUDES                                  */
 /*============================================================================*/
 #include "gen.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*============================================================================*/
 /*                           FUNCTION PROTOTYPES                              */
 /*============================================================================*/
 /**
- * @brief Initializes IPC socket and binds to slave receive port.
- * @return ERROR_CODE ERR_OK on success, error code on failure
+ * @brief Initializes LoRa communication interface.
+ * @return ERROR_CODE ERR_OK_INTR on success, error code on failure
  */
-ERROR_CODE initialize_ipc( void );
+ERROR_CODE initialize_LoRa( void );
 
 /**
- * @brief Sends data to master via IPC unicast.
+ * @brief Sends data via LoRa interface.
  * @param [in] pvData Pointer to data buffer to send
  * @param [in] u16Len Length of data in bytes
- * @return ERROR_CODE ERR_OK on success, error code on failure
- * @note Master address is 127.0.0.1:46000
+ * @return ERROR_CODE ERR_OK_INTR on success, error code on failure
  */
-ERROR_CODE send_ipc( PVOID pvData, UINT16 u16Len );
+ERROR_CODE send_LoRa( PVOID pvData, UINT16 u16Len );
 
 /**
- * @brief Receives data from master via IPC broadcast.
+ * @brief Receives data via LoRa interface.
  * @param [out] ppvData Pointer to receive buffer pointer
- * @return ERROR_CODE ERR_OK on success, error code on failure
- * @note Slave listens on 255.255.255.255:47001
+ * @return ERROR_CODE ERR_OK_INTR on success, error code on failure
  */
-ERROR_CODE receive_ipc( PVOID *ppvData );
+ERROR_CODE receive_LoRa( PVOID *ppvData );
 
-#endif /* IPC_H */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LORAHAL_H */

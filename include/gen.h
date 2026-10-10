@@ -36,7 +36,7 @@ typedef void VOID;
 /* ================== ENUMS ================== */
 
 typedef enum { 
-    ERR_OK = 0, 
+    ERR_OK_INTR = 0,
     ERR_NET_IF_FAIL,
     ERR_INVALID_PARAM,
     ERR_INVALID_STATE,
@@ -178,7 +178,7 @@ static inline PCHAR convert_err2str( ERROR_CODE enErrorCode )
 {
     switch ( enErrorCode )
     {
-        case ERR_OK: return "ERR_OK";
+        case ERR_OK_INTR: return "ERR_OK_INTR";
         case ERR_NET_IF_FAIL: return "ERR_NET_IF_FAIL";
         case ERR_INVALID_PARAM: return "ERR_INVALID_PARAM";
         case ERR_INVALID_STATE: return "ERR_INVALID_STATE";

@@ -30,8 +30,8 @@
 /* Network Interfaces Configuration */
 
 // LAN Interfaces
-//#define ENABLE_LORA_FOR_LAN
-#define ENABLE_IPC_SIMULATION
+#define ENABLE_LORA_FOR_LAN
+//#define ENABLE_IPC_SIMULATION
 /* Logging configuration */
 
 #define ENABLE_DBG
@@ -44,7 +44,7 @@
 // Valve to GPIO mapping configuration                  Valve number    GPIO Pin
 static char au8AssValves[MAX_VALVES][2] = {     {               0,          1}, 
                                                 {               1,          2}, 
-                                                {/* Invalid*/  -1,          3}, 
-                                                {/* Invalid*/  -1,          4} };
+                                                {/* Invalid*/  255,          3}, 
+                                                {/* Invalid*/  255,          4} };
 #endif /* OPTIONS_H */
 

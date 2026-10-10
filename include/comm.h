@@ -85,7 +85,7 @@ ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalA
 /**
  * @brief Evaluates integrity of received order using CRC validation.
  * @param [in] pvOrderBuffer Pointer to order buffer to validate
- * @return ERROR_CODE ERR_OK if integrity check passes, error code otherwise
+ * @return ERROR_CODE ERR_OK_INTR if integrity check passes, error code otherwise
  */
 ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer );
 

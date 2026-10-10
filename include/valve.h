@@ -31,7 +31,7 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive );
 /**
  * @brief Hardware abstraction for valve actuation with simulated delay.
  * @param [in] u8ActionType Type of action to perform (open/close/etc.)
- * @return ERROR_CODE ERR_OK on success, error code on failure
+ * @return ERROR_CODE ERR_OK_INTR on success, error code on failure
  * @note Includes random delay of 0-5 seconds for realistic simulation
  */
 ERROR_CODE hal_actuate_valve( UINT8 u8ActionType );

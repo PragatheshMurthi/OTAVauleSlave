@@ -42,8 +42,8 @@ static GLOBAL_ARCHIVE *gstInformationDB;
 static GLOBAL_ARCHIVE *gstInformationDB;
 
 /* Defenitions */
-void setup() {
-  ERROR_CODE enErrorCode = ERR_OK;
+void vmain_setup() {
+  ERROR_CODE enErrorCode = ERR_OK_INTR;
 
   // Create memory for the global information data base.
   gstInformationDB = malloc ( sizeof ( GLOBAL_ARCHIVE ));
@@ -56,7 +56,7 @@ void setup() {
 
   // Initialize the network modules for com.
   enErrorCode = initialize_interfaces( gstInformationDB );
-  if ( enErrorCode != ERR_OK) {
+  if ( enErrorCode != ERR_OK_INTR) {
       // Handle the error here
       print_err("%s:NetModInit<KO>ERR<%d>",__FUNCTION__,enErrorCode);
       free( gstInformationDB );
@@ -67,7 +67,7 @@ void setup() {
   gstInformationDB->enSlaveState = SLAVE_READY;
 }
 
-void loop() {
+void vmain_loop() {
   // All the core listening functionalities...
   startWorking();
   print_dbg("Work halted...");

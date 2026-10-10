@@ -34,7 +34,7 @@ ERROR_CODE initialize_LoRa(void)
     LoRa.setPreambleLength(LORA_PREAMBLE_LENGTH);
     LoRa.setSyncWord(LORA_SYNC_WORD);
     print_info("initialize_LoRa: ready");
-    return ERR_OK;
+    return ERR_OK_INTR;
 }
 
 ERROR_CODE send_LoRa(PVOID pvData, UINT16 u16Len)
@@ -55,7 +55,7 @@ ERROR_CODE send_LoRa(PVOID pvData, UINT16 u16Len)
 
     LoRa.write(static_cast<const UINT8 *>(pvData), u16Len);
     if (LoRa.endPacket() != 0) {
-        return ERR_OK;
+        return ERR_OK_INTR;
     }
     return ERR_NET_IF_FAIL;
 
@@ -87,11 +87,23 @@ ERROR_CODE receive_LoRa(PVOID *ppvData)
         return ERR_INVALID_PARAM;
     }
 
-    const int bytesRead = LoRa.read(au8LoRaReceiveBuffer, packetLength);
+    int bytesRead = 0;
+    
+    // Read sequentially from the LoRa internal buffer into your array
+    while (LoRa.available() && bytesRead < packetLength) {
+        int value = LoRa.read();
+        if (value < 0) {
+            return ERR_NET_IF_FAIL; // Communication stream error
+        }
+        au8LoRaReceiveBuffer[bytesRead++] = (UINT8)value;
+    }
+
+    // Verify if we actually received the exact number of bytes expected
     if (bytesRead != packetLength) {
         return ERR_NET_IF_FAIL;
     }
 
+
     *ppvData = au8LoRaReceiveBuffer;
-    return ERR_OK;
+    return ERR_OK_INTR;
 }

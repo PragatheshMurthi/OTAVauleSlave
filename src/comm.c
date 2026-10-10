@@ -11,7 +11,7 @@
 
 PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
 {
-    ERROR_CODE enErrorCode = ERR_OK;
+    ERROR_CODE enErrorCode = ERR_OK_INTR;
     PVOID pvOrderBuffer = NULL;
 
     DBG_ENTRY
@@ -24,7 +24,7 @@ PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
         return NULL;
     }
 
-    if ( get_error( pstGlobalArchive ) != ERR_OK )
+    if ( get_error( pstGlobalArchive ) != ERR_OK_INTR )
     {
         print_err("%s:ErrorInPreviousState<KO><%d>", __FUNCTION__, get_error( pstGlobalArchive ));
         DBG_EXIT
@@ -33,12 +33,12 @@ PVOID expect_order ( GLOBAL_ARCHIVE* pstGlobalArchive )
     
     enErrorCode = hal_receive_from_master( &pvOrderBuffer );
 
-    if ( enErrorCode == ERR_OK && NULL != pvOrderBuffer )
+    if ( enErrorCode == ERR_OK_INTR && NULL != pvOrderBuffer )
     {
         print_dbg("%s:OrderRecieved<OK><OB[%p]><%d>", __FUNCTION__, pvOrderBuffer, enErrorCode);
         enErrorCode = evaluate_integrity( pvOrderBuffer );
 
-        if ( enErrorCode != ERR_OK )
+        if ( enErrorCode != ERR_OK_INTR )
         {
             // Handle integrity check failure
             print_err("%s:OrderIntegrityCheck<KO>ERR<%d>", __FUNCTION__, enErrorCode);
@@ -85,7 +85,7 @@ ERROR_CODE evaluate_integrity( PVOID pvOrderBuffer )
     }
 
     DBG_EXIT
-    return ERR_OK;
+    return ERR_OK_INTR;
 }
 
 UINT32 calculate_crc( PVOID pvOrderBuffer, UINT16 u16OrderLength )
@@ -123,7 +123,7 @@ UINT32 calculate_crc( PVOID pvOrderBuffer, UINT16 u16OrderLength )
 
 VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
 {
-    ERROR_CODE enErrorCode = ERR_OK;
+    ERROR_CODE enErrorCode = ERR_OK_INTR;
     ACK_BUFFER stAckBuffer = { 0 };
 
     DBG_ENTRY
@@ -145,7 +145,7 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
         stAckBuffer.acOrderStatus[sizeof(stAckBuffer.acOrderStatus) - 1] = '\0';
     }
 
-    if ( fill_ack_buffer( &stAckBuffer, pstGlobalArchive ) != ERR_OK )
+    if ( fill_ack_buffer( &stAckBuffer, pstGlobalArchive ) != ERR_OK_INTR )
     {
         strncpy(stAckBuffer.acOrderStatus, "STATUS_POPULATION_FAILED", sizeof(stAckBuffer.acOrderStatus) - 1);
         stAckBuffer.acOrderStatus[sizeof(stAckBuffer.acOrderStatus) - 1] = '\0';
@@ -158,13 +158,13 @@ VOID update_master( GLOBAL_ARCHIVE* pstGlobalArchive )
     
     enErrorCode = hal_send_to_master( &stAckBuffer, sizeof(stAckBuffer) );
 
-    if ( enErrorCode == ERR_OK )
+    if ( enErrorCode == ERR_OK_INTR )
     {
         print_dbg("%s:AckSent<OK><AB[%p]><%d>", __FUNCTION__, &stAckBuffer, enErrorCode);
     } else {
         print_err("%s:AckSend<KO>ERR<%d>", __FUNCTION__, enErrorCode);
     }
-    set_error(pstGlobalArchive, ERR_OK); // Reset error status after sending acknowledgment
+    set_error(pstGlobalArchive, ERR_OK_INTR); // Reset error status after sending acknowledgment
     DBG_EXIT
     return;
 }
@@ -179,7 +179,7 @@ ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalA
 
     switch ( pstGlobalArchive->enInstErrStatus )
     {
-        case ERR_OK:
+        case ERR_OK_INTR:
             if ( pstGlobalArchive->enSlaveState == SLAVE_ORDER_PROCESSED )
             {
                 strncpy(pstAckBuffer->acOrderStatus, "ORDER_PROCESSED", sizeof(pstAckBuffer->acOrderStatus) - 1);
@@ -200,7 +200,7 @@ ERROR_CODE fill_ack_buffer( ACK_BUFFER* pstAckBuffer, GLOBAL_ARCHIVE* pstGlobalA
     
     print_dbg("%s:AckBufferFilled<OK><AB[%p]VN[%d]SN[%d]>", __FUNCTION__, pstAckBuffer, pstAckBuffer->u32ValveNumber, pstAckBuffer->u32SequenceNumber);
 
-    return ERR_OK;
+    return ERR_OK_INTR;
 }
 
 /* ============== PARSER IMPLEMENTATION ============== */
@@ -218,7 +218,7 @@ VOID parse_order( GLOBAL_ARCHIVE* pstGlobalArchive, PVOID pvOrderBuffer )
         return;
     }
 
-    if ( get_error( pstGlobalArchive ) != ERR_OK )
+    if ( get_error( pstGlobalArchive ) != ERR_OK_INTR )
     {
         print_err("%s:ErrorInPreviousState<KO><%d>", __FUNCTION__, get_error( pstGlobalArchive ));
         DBG_EXIT

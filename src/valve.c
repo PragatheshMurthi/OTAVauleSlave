@@ -38,7 +38,7 @@
 
 VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
 {
-    ERROR_CODE enErrorCode = ERR_OK;
+    ERROR_CODE enErrorCode = ERR_OK_INTR;
 
     DBG_ENTRY
 
@@ -50,7 +50,7 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
         return;
     }
 
-    if ( get_error( pstGlobalArchive ) != ERR_OK )
+    if ( get_error( pstGlobalArchive ) != ERR_OK_INTR )
     {
         print_err("%s:ErrorInPreviousState<KO><%d>", __FUNCTION__, get_error( pstGlobalArchive ));
         DBG_EXIT
@@ -63,7 +63,7 @@ VOID initiate_order( GLOBAL_ARCHIVE* pstGlobalArchive )
         // Initiate the order based on the parsed details in the global archive.
         enErrorCode = hal_actuate_valve( pstGlobalArchive->u8ActionType );
 
-        if ( enErrorCode == ERR_OK )
+        if ( enErrorCode == ERR_OK_INTR )
         {
             pstGlobalArchive->enSlaveState = SLAVE_ORDER_PROCESSED;
             print_dbg("%s:OrderInitiated<OK><VN[%d]AT[%d]TC[%d]SS[%d]>", __FUNCTION__, pstGlobalArchive->u32ValveNumber, pstGlobalArchive->u8ActionType, pstGlobalArchive->u32TimerCntS, pstGlobalArchive->enSlaveState);
@@ -99,5 +99,5 @@ ERROR_CODE hal_actuate_valve( UINT8 u8ActionType )
     print_info("%s:Valve actuation completed after %u seconds", __FUNCTION__, u32RandomDelay);
     DBG_EXIT
     // Simulate a successful initiation
-    return ERR_OK;
+    return ERR_OK_INTR;
 }

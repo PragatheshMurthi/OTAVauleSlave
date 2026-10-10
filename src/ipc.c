@@ -60,7 +60,7 @@ ERROR_CODE initialize_ipc(void)
     if (g_iIpcSocket >= 0)
     {
         print_info("initialize_ipc: already initialized\n");
-        return ERR_OK;
+        return ERR_OK_INTR;
     }
 
     /*
@@ -143,7 +143,7 @@ ERROR_CODE initialize_ipc(void)
                IPC_BROADCAST_IP,
                IPC_SLAVE_PORT);
 
-    return ERR_OK;
+    return ERR_OK_INTR;
 }
 
 
@@ -214,7 +214,7 @@ ERROR_CODE send_ipc(PVOID pvData, UINT16 u16Len)
                IPC_MASTER_IP,
                IPC_MASTER_PORT);
 
-    return ERR_OK;
+    return ERR_OK_INTR;
 }
 
 
@@ -291,5 +291,5 @@ ERROR_CODE receive_ipc(PVOID *ppvData)
                inet_ntoa(sender_addr.sin_addr),
                ntohs(sender_addr.sin_port));
 
-    return ERR_OK;
+    return ERR_OK_INTR;
 }
